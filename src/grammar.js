@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const { Parser } = require('jison');
+const Block = require('./Block');
+const buildOp = require('./buildOp');
 
 const rule = (exp, ) => {
 
@@ -27,7 +29,12 @@ const grammar = {
     ],
 
     Statement: [
-      ['Num Num Num', '$$ = $1 $2 $3'],
+      buildOp('Num Opt Num',
+        function() {
+          return new Block();
+        }
+      ),
+      //['Num Opt Num', '$$ = $1 + \' + \' + $3'],
     ],
 
     Num: [
