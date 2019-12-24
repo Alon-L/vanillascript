@@ -1,0 +1,22 @@
+{
+  "name": "vanillascript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/",
+    "grammar": "node src/grammar"
+  },
+  "keywords": [
+    "javascript",
+    "vanillascript"
+  ],
+  "author": "Alon Livne",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "jison": "^0.4.18",
+    "webpack": "^4.41.4"
+  }
+}
