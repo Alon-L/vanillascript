@@ -4,10 +4,6 @@ const { Parser } = require('jison');
 const Block = require('./Block');
 const buildOp = require('./buildOp');
 
-const rule = (exp, ) => {
-
-};
-
 const grammar = {
   lex: {
     rules: [
@@ -31,23 +27,22 @@ const grammar = {
     Statement: [
       buildOp('Num Opt Num',
         function() {
-          return new Block();
+          return new Block;
         }
       ),
-      //['Num Opt Num', '$$ = $1 + \' + \' + $3'],
     ],
 
     Num: [
       ['NUM', '$$ = Number(yytext)']
     ],
-
-    Opt: [
-      ['OPT', '$$ = yytext.toString()']
-    ]
   }
 };
 
 const parser = new Parser(grammar);
+
+parser.yy = {
+  Block
+};
 
 const code = fs.readFileSync(path.join(__dirname, './calculator.test.vanilla')).toString();
 
