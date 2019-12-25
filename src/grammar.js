@@ -56,6 +56,7 @@ const grammar = {
     Expression: [
       buildRule('Assign'),
       buildRule('Math'),
+      buildRule('Statement'),
     ],
 
     Assign: [
@@ -74,6 +75,10 @@ const grammar = {
         }
       ),
     ],
+
+    Statement: [
+      buildRule('BOOL')
+    ]
   }
 };
 
