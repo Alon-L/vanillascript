@@ -5,7 +5,8 @@ const Root = require('./Root');
 const Block = require('./Block');
 const Assign = require('./Assign');
 const CodeLine = require('./CodeLine');
-const buildOp = require('./buildOp');
+const MathOp = require('./MathOp');
+const buildRule = require('./buildRule');
 
 const grammar = {
   lex: {
@@ -13,54 +14,66 @@ const grammar = {
       ['\\s+', '/* skip whitespace */'],
       ['false|true', `return 'BOOL'`],
       ['(\\+|\\-|\\*|\\/)', `return 'OPT'`],
-      ['\=', `return 'ASSIGN'`],
+      ['\=', `return '='`],
       ['\\b([a-zA-Z_][^\\s]*)', `return 'IDENTIFIER'`],
       ['([0-9])+', `return 'NUM'`],
       ['$', `return 'EOF'`],
     ]
   },
 
+  operators: [
+    ['left', '+', '-'],
+    ['left', '*', '/'],
+  ],
+
   bnf: {
     // Add variable declarations on top
     Root: [
-      buildOp('CodeLines EOF',
-        function() {
+      buildRule('CodeLines EOF',
+        function () {
           return new Root('$1');
         }
       ),
     ],
 
-    //Root: [['CodeLines EOF', 'return (function(arg1, yy) {return `var ${yy.variables.join(", ")};\n\n${arg1}`})($1, yy)']],
+    //Root: [['CodeLines EOF', 'return (function(arg1, yy) {return `var ${yy.variables.join(", ")};\n\n${arg1}`})($1,
+    // yy)']],
 
     CodeLines: [
       ['', '$$ = ""'],
-      buildOp('CodeLine CodeLines',
-        function() {
+      buildRule('CodeLine CodeLines',
+        function () {
           return new CodeLine('$1', '$2');
         }
       ),
     ],
 
     CodeLine: [
-      ['Statement', '$$ = $1'],
-      ['Statements', '$$ = $1'],
+      buildRule('Statement'),
+      buildRule('Expression'),
     ],
 
-    Statements: [
-      buildOp('IDENTIFIER ASSIGN Statement',
-        function() {
+    Expression: [
+      buildRule('Assign'),
+      buildRule('Math'),
+    ],
+
+    Assign: [
+      buildRule('IDENTIFIER = Expression',
+        function () {
           return new Assign('$1', '$2', '$3');
         }
       ),
     ],
 
-    Statement: [
-      buildOp('NUM OPT NUM',
-        function() {
-          return new Block('$1', '$2', '$3');
+    Math: [
+      buildRule('NUM'),
+      buildRule('Math OPT Math',
+        function () {
+          return new MathOp('$1', '$2', '$3');
         }
       ),
-    ]
+    ],
   }
 };
 
@@ -71,6 +84,7 @@ parser.yy = {
   Block,
   Assign,
   CodeLine,
+  MathOp,
   variables: new Set()
 };
 
