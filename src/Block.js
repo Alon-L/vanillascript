@@ -1,11 +1,12 @@
 module.exports = class Block {
-  constructor(arg1, bridge, arg2) {
+  constructor(yy, arg1, arg2, arg3) {
+    this.yy = yy;
     this.arg1 = arg1;
-    this.bridge = bridge;
     this.arg2 = arg2;
+    this.arg3 = arg3;
   }
 
   stringify() {
-    return `${this.arg1} ${this.bridge} ${this.arg2}`;
+    return `${this.arg1} ${this.arg2} ${this.arg3}`;
   }
 };
