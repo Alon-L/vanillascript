@@ -3,6 +3,9 @@ const fs = require('fs');
 const { Parser } = require('jison');
 const Root = require('./Root');
 const Block = require('./Block');
+const Do = require('./Do');
+const When = require('./When');
+const ResolvableParentheses = require('./ResolvableParentheses');
 const Assign = require('./Assign');
 const CodeLine = require('./CodeLine');
 const MathOp = require('./MathOp');
@@ -12,9 +15,18 @@ const grammar = {
   lex: {
     rules: [
       ['\\s+', '/* skip whitespace */'],
+      ['when', `return 'WHEN'`],
+      ['do', `return 'DO'`],
+      ['\\(', `return '('`],
+      ['\\)', `return ')'`],
+      ['\\{', `return '{'`],
+      ['\\}', `return '}'`],
       ['false|true', `return 'BOOL'`],
-      ['(\\+|\\-|\\*|\\/)', `return 'OPT'`],
-      ['\=', `return '='`],
+      ['\\+', `return '+'`],
+      ['\\-', `return '-'`],
+      ['\\*', `return '*'`],
+      ['\\/', `return '/'`],
+      ['\\=', `return '='`],
       ['\\b([a-zA-Z_][^\\s]*)', `return 'IDENTIFIER'`],
       ['([0-9])+', `return 'NUM'`],
       ['$', `return 'EOF'`],
@@ -49,14 +61,36 @@ const grammar = {
     ],
 
     CodeLine: [
-      buildRule('Statement'),
-      buildRule('Expression'),
+      buildRule('Assign'),
+      buildRule('When'),
     ],
 
     Expression: [
-      buildRule('Assign'),
       buildRule('Math'),
-      buildRule('Statement'),
+    ],
+
+    When: [
+      buildRule('WHEN Expression Do',
+        function() {
+          return new When('$1', '$2', '$3');
+        }
+      ),
+    ],
+
+    Do: [
+      buildRule('DO Block',
+        function() {
+          return new Do('$1', '$2');
+        }
+      ),
+    ],
+
+    Block: [
+      buildRule('{ CodeLines }',
+        function() {
+          return new Block('$1', '$2', '$3');
+        }
+      ),
     ],
 
     Assign: [
@@ -68,17 +102,39 @@ const grammar = {
     ],
 
     Math: [
-      buildRule('NUM'),
-      buildRule('Math OPT Math',
+      buildRule('Resolvable'),
+      buildRule('Math + Math',
+        function () {
+          return new MathOp('$1', '$2', '$3');
+        }
+      ),
+      buildRule('Math - Math',
+        function () {
+          return new MathOp('$1', '$2', '$3');
+        }
+      ),
+      buildRule('Math * Math',
+        function () {
+          return new MathOp('$1', '$2', '$3');
+        }
+      ),
+      buildRule('Math / Math',
         function () {
           return new MathOp('$1', '$2', '$3');
         }
       ),
     ],
 
-    Statement: [
-      buildRule('BOOL')
-    ]
+    Resolvable: [
+      buildRule('NUM'),
+      buildRule('BOOL'),
+      buildRule('STRING'),
+      buildRule('(Resolvable)',
+        function() {
+          return new ResolvableParentheses('$1', '$2', '$3');
+        }
+      )
+    ],
   }
 };
 
@@ -87,6 +143,9 @@ const parser = new Parser(grammar);
 parser.yy = {
   Root,
   Block,
+  Do,
+  When,
+  ResolvableParentheses,
   Assign,
   CodeLine,
   MathOp,

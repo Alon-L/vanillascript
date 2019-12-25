@@ -10,7 +10,7 @@ const buildRule = (tokens, action) => {
     // Use the class members stored under 'yy'.
     // All required classes are contained in the 'yy' object.
     action = action.replace(/\bnew /g, '$&yy.');
-    action = action.replace(/\b(?:Block\.wrap|extend)\b/g, 'yy.$&');
+    action = action.replace(/\b(?:Base\.wrap|extend)\b/g, 'yy.$&');
 
     // Add the 'yy' as first parameter
     action = action.replace(/\((.*?)\)/g, '(yy, $1)');

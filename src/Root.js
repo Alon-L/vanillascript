@@ -1,6 +1,6 @@
-const Block = require('./Block');
+const Base = require('./Base');
 
-module.exports = class Root extends Block {
+module.exports = class Root extends Base {
   constructor(yy, arg1) {
     super(yy, arg1);
 
