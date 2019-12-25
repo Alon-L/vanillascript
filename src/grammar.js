@@ -3,9 +3,10 @@ const fs = require('fs');
 const { Parser } = require('jison');
 const Root = require('./Root');
 const Block = require('./Block');
+const BlockEnd = require('./BlockEnd');
 const Do = require('./Do');
 const When = require('./When');
-const ResolvableParentheses = require('./ResolvableParentheses');
+const ExpressionParentheses = require('./ExpressionParentheses');
 const Assign = require('./Assign');
 const CodeLine = require('./CodeLine');
 const MathOp = require('./MathOp');
@@ -67,6 +68,11 @@ const grammar = {
 
     Expression: [
       buildRule('Math'),
+      buildRule('( Expression )',
+        function() {
+          return new ExpressionParentheses('$1', '$2', '$3');
+        }
+      )
     ],
 
     When: [
@@ -86,9 +92,14 @@ const grammar = {
     ],
 
     Block: [
-      buildRule('{ CodeLines }',
+      buildRule('{ CodeLines Block',
         function() {
           return new Block('$1', '$2', '$3');
+        }
+      ),
+      buildRule('}',
+        function() {
+          return new BlockEnd('$1')
         }
       ),
     ],
@@ -99,10 +110,16 @@ const grammar = {
           return new Assign('$1', '$2', '$3');
         }
       ),
+      ['IDENTIFIER = Expression', '$$ = $1' + ' = ' + '$2']
     ],
 
     Math: [
       buildRule('Resolvable'),
+      buildRule('( Math )',
+        function() {
+          return new ExpressionParentheses('$1', '$2', '$3');
+        }
+      ),
       buildRule('Math + Math',
         function () {
           return new MathOp('$1', '$2', '$3');
@@ -129,27 +146,26 @@ const grammar = {
       buildRule('NUM'),
       buildRule('BOOL'),
       buildRule('STRING'),
-      buildRule('(Resolvable)',
-        function() {
-          return new ResolvableParentheses('$1', '$2', '$3');
-        }
-      )
     ],
   }
 };
 
 const parser = new Parser(grammar);
 
+
+
 parser.yy = {
   Root,
   Block,
+  BlockEnd,
   Do,
   When,
-  ResolvableParentheses,
+  ExpressionParentheses,
   Assign,
   CodeLine,
   MathOp,
-  variables: new Set()
+  variables: new Set(),
+  indent: 0,
 };
 
 const code = fs.readFileSync(path.join(__dirname, './calculator.test.vanilla')).toString();

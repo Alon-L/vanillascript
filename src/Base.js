@@ -9,4 +9,12 @@ module.exports = class Base {
   stringify() {
     return `${this.arg1} ${this.arg2} ${this.arg3}`;
   }
+
+  buildIndent() {
+    let indent = '';
+    for (let i = 0; i < this.yy.indent; i++) {
+        indent += '  ';
+    }
+    return indent;
+  }
 };

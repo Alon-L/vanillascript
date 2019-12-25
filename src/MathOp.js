@@ -6,7 +6,6 @@ module.exports = class MathOp extends Base {
   }
 
   stringify() {
-    // TODO: Always use 3 args.
-    return `${this.arg1} ${this.arg2}${this.arg3 ? ' ' + this.arg3 : ''}`;
+    return `${this.arg1} ${this.arg2} ${this.arg3}`;
   }
 };

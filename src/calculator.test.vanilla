@@ -2,11 +2,13 @@ ab = 5 + 2 + 3
 a = 3 + 2
 b = 3 + 5
 c = 3 + 2
-d = 3 + 4
+d = (3 + 4) * 2
 e = 3 + 5
 shagd = true + false
 shagd = true
+
 when true do {
   c = 2
   a = 35 + 2 * 7
+  when true do {}
 }

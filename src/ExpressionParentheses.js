@@ -1,6 +1,6 @@
 const Base = require('./Base');
 
-module.exports = class ResolvableParentheses extends Base {
+module.exports = class ExpressionParentheses extends Base {
   constructor(yy, arg1, arg2, arg3) {
     super(yy, arg1, arg2, arg3);
   }
