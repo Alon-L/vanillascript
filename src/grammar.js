@@ -168,6 +168,7 @@ const grammar = {
 
     Text: [
       ['', '$$ = ""'],
+      buildRule('TEXT'),
       buildRule('Resolvable Text',
         function() {
           return new TextOp('$1', '$2');
