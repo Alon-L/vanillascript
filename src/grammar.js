@@ -9,6 +9,8 @@ const When = require('./When');
 const ExpressionParentheses = require('./ExpressionParentheses');
 const Assign = require('./Assign');
 const CodeLine = require('./CodeLine');
+const StringOp = require('./StringOp');
+const TextOp = require('./TextOp');
 const MathOp = require('./MathOp');
 const buildRule = require('./buildRule');
 
@@ -28,8 +30,11 @@ const grammar = {
       ['\\*', `return '*'`],
       ['\\/', `return '/'`],
       ['\\=', `return '='`],
-      ['\\b([a-zA-Z_][^\\s]*)', `return 'IDENTIFIER'`],
+      ['\'', `return 'SINGLEQUOTE'`],
+      ['\"', `return 'DOUBLEQUOTE'`],
+      ['[a-zA-Z_]+', `return 'IDENTIFIER'`],
       ['([0-9])+', `return 'NUM'`],
+      ['[^\'"]+', `return 'TEXT'`],
       ['$', `return 'EOF'`],
     ]
   },
@@ -67,12 +72,12 @@ const grammar = {
     ],
 
     Expression: [
-      buildRule('Math'),
       buildRule('( Expression )',
         function() {
           return new ExpressionParentheses('$1', '$2', '$3');
         }
-      )
+      ),
+      buildRule('Math'),
     ],
 
     When: [
@@ -110,7 +115,6 @@ const grammar = {
           return new Assign('$1', '$2', '$3');
         }
       ),
-      ['IDENTIFIER = Expression', '$$ = $1' + ' = ' + '$2']
     ],
 
     Math: [
@@ -145,8 +149,31 @@ const grammar = {
     Resolvable: [
       buildRule('NUM'),
       buildRule('BOOL'),
-      buildRule('STRING'),
+      buildRule('IDENTIFIER'),
+      buildRule('String'),
     ],
+
+    String: [
+      buildRule('Quote Text Quote',
+        function() {
+          return new StringOp('$1', '$2', '$3');
+        }
+      ),
+    ],
+
+    Quote: [
+      buildRule('SINGLEQUOTE'),
+      buildRule('DOUBLEQUOTE'),
+    ],
+
+    Text: [
+      ['', '$$ = ""'],
+      buildRule('Resolvable Text',
+        function() {
+          return new TextOp('$1', '$2');
+        }
+      ),
+    ]
   }
 };
 
@@ -164,6 +191,8 @@ parser.yy = {
   Assign,
   CodeLine,
   MathOp,
+  StringOp,
+  TextOp,
   variables: new Set(),
   indent: 0,
 };

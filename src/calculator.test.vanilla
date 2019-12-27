@@ -10,5 +10,7 @@ shagd = true
 when true do {
   c = 2
   a = 35 + 2 * 7
-  when true do {}
+  when true do {
+    a = b + c * 2 + 'a asd'
+  }
 }
